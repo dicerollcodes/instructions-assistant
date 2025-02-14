@@ -1,4 +1,4 @@
-Instructions Assistant Assistant
+## Instructions Assistant Assistant
 
 Instructions Assistant is a web application that helps users follow assembly instructions by analyzing images from a PDF manual and a webcam feed. It provides step-by-step guidance for assembling products.
 
@@ -8,6 +8,10 @@ Instructions Assistant is a web application that helps users follow assembly ins
 - Capture images from a webcam
 - Analyze the current assembly state and provide the next step
 - Uses OpenAI's API for image analysis
+
+## Purpose
+
+This project was developed for a robotics team to assist new members with understanding and following complex build instructions. It simplifies the process of assembling intricate hardware by providing clear, step-by-step guidance, ensuring that even those unfamiliar with the components can successfully complete the builds.
 
 ## Prerequisites
 
