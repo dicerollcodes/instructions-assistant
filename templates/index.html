@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assembly Assistant</title>
+    <style>
+        /* Basic styles for clarity */
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        section { margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <h1>Assembly Assistant</h1>
+    
+    <!-- PDF Upload Section -->
+    <section>
+        <h2>1. Upload Instruction Manual (PDF)</h2>
+        <form action="/upload_pdf" method="post" enctype="multipart/form-data">
+            <input type="file" name="pdf" accept="application/pdf" required>
+            <button type="submit">Upload PDF</button>
+        </form>
+    </section>
+
+    <!-- Webcam Capture Section -->
+    <section>
+        <h2>2. Capture Workstation Image</h2>
+        <video id="video" width="640" height="480" autoplay></video><br>
+        <button id="snap">Capture</button>
+        <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+    </section>
+
+    <!-- Next Step Instructions Display -->
+    <section id="instructions">
+        <h2>3. Next Step</h2>
+        <p id="nextStepText">Your instructions will appear here.</p>
+    </section>
+
+    <script>
+        // Access the device camera and stream to the video element.
+        const video = document.getElementById('video');
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.play();
+                })
+                .catch(error => {
+                    console.error("Error accessing webcam: ", error);
+                    alert("Could not access the webcam. Please check your browser settings.");
+                });
+        }
+
+        // Capture image when the "Capture" button is clicked.
+        document.getElementById("snap").addEventListener("click", function() {
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert the canvas image to a Base64 string.
+            const dataURL = canvas.toDataURL('image/png');
+            const base64Image = dataURL.split(',')[1]; // Remove data URL prefix.
+
+            // Send the image data to the server.
+            fetch('/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image_data: base64Image })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.next_step) {
+                    document.getElementById('nextStepText').innerText = data.next_step;
+                } else if (data.error) {
+                    document.getElementById('nextStepText').innerText = "Error: " + data.error;
+                }
+            })
+            .catch(error => {
+                document.getElementById('nextStepText').innerText = "Error: " + error;
+            });
+        });
+    </script>
+</body>
+</html>
